@@ -313,14 +313,14 @@ def test_history_scan_still_catches_leak_in_a_long_history(tmp_path):
     assert r.returncode == 1 and "history" in (r.stdout + r.stderr).lower()
 
 
-def test_nora_subsections_start_collapsed():
-    # Jonas: the Nora subsections must be collapsed by default so the ideas are not buried.
+def test_nora_is_demoted_and_comes_last_of_the_argument_sections():
+    # BizOps reframe: the 90-day plan is the pitch; Nora is proof, kept short and after it.
     html = (ROOT / "index.html").read_text()
-    nora = html[html.index('<section id="nora">') : html.index('<section id="como-trabalho">')]
-    subs = nora.count("<h3>")
-    assert subs >= 5
-    assert nora.count('<details class="sub">') == subs  # every h3 lives in a details
-    assert "<details class=\"sub\" open" not in nora and "<details open" not in nora
+    order = ["abertura", "ideias", "como-trabalho", "nora", "contacto"]
+    pos = [html.index(f'<section id="{s}"') for s in order]
+    assert pos == sorted(pos), "sections must come in argument order: plan, then proof"
+    nora = html[html.index('<section id="nora">') : html.index('<section id="contacto">')]
+    assert '<details class="sub">' not in nora and "<h3>" not in nora
 
 
 def test_para_and_gtd_have_explanations():
@@ -369,8 +369,7 @@ def _tips():
     return p
 
 
-MUST_EXPLAIN = ["Data Engineering", "DKIM", "webhook", "idempotência", "Outbox", "LLM", "tenant", "dry-run",
-                "Copilot", "governança", "lakehouse", "feature store", "star schema", "commodities", "token"]
+MUST_EXPLAIN = ["Microsoft 365", "Entra", "Copilot", "playbook", "PARA", "GTD", "leitor por IA"]
 
 
 def test_hard_terms_have_explanations():
@@ -382,21 +381,17 @@ def test_hard_terms_have_explanations():
 
 def test_tips_are_well_formed_and_not_inside_links_headings_or_code():
     p = _tips()
-    assert len(p.tips) >= 20
+    assert len(p.tips) >= 6  # ops reader, fewer terms than the engineering page — floor keeps density honest
     assert not p.bad, p.bad
     for t in p.tips:
         assert len(t["tip"]) >= 30 and t["label"].startswith(t["text"] + ": ") and t["tip"] in t["label"]
 
 
-def test_project_cards_are_two_rows_of_two_with_corpus_beside_the_lakehouse_bridge():
+def test_no_engineering_card_grid_corpus_stays_as_the_one_system():
+    # BizOps reframe: the four-project engineering wall is gone; Corpus stays as proof of the
+    # knowledge-organization idea, Vitals survives as a link only.
     html = (ROOT / "index.html").read_text()
-    cards = html[html.index('<div class="cards">') : html.index("</section>", html.index('<div class="cards">'))]
-    order = ["Vitals", "Fleetlytics", "Corpus", "Lakehouse CDC Bridge"]
-    pos = [cards.index(f">{n}</a>") for n in order]
-    assert pos == sorted(pos), "cards must come in this order"
-    assert cards.count('<article class="card') == 4
-    assert 'href="https://joaoblasques.com/corpus/"' in cards
-    assert 'href="https://github.com/joaoblasques/corpus"' in cards
-    assert 'href="https://joaoblasques.com/lakehouse-cdc-bridge/"' in cards
-    assert 'href="https://github.com/joaoblasques/lakehouse-cdc-bridge"' in cards
-    assert "sintétic" in cards, "the bridge uses synthetic data and the card must say so"
+    assert '<div class="cards">' not in html
+    assert "Fleetlytics" not in html and "Lakehouse CDC Bridge" not in html
+    assert 'href="https://joaoblasques.com/corpus/"' in html
+    assert 'href="https://github.com/joaoblasques/vitals"' in html
