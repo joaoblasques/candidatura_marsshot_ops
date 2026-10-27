@@ -13,6 +13,7 @@ ALLOWED_PREFIXES = (
     "https://github.com/joaoblasques/",
     "https://www.forecastfactor.ai/",
     "https://joaoblasques.com/",
+    "https://github.com/ModernRelay/omnigraph",
     "mailto:talk@marsshot.eu",
 )
 ALLOWED_EXACT = (

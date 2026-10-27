@@ -369,7 +369,7 @@ def _tips():
     return p
 
 
-MUST_EXPLAIN = ["Microsoft 365", "Entra", "Copilot", "playbook", "PARA", "GTD", "leitor por IA"]
+MUST_EXPLAIN = ["Microsoft 365", "Entra", "Copilot", "playbook", "PARA", "GTD", "leitor por IA", "knowledge graph"]
 
 
 def test_hard_terms_have_explanations():
@@ -385,6 +385,21 @@ def test_tips_are_well_formed_and_not_inside_links_headings_or_code():
     assert not p.bad, p.bad
     for t in p.tips:
         assert len(t["tip"]) >= 30 and t["label"].startswith(t["text"] + ": ") and t["tip"] in t["label"]
+
+
+def test_send_claim_stays_within_what_the_excerpt_shows():
+    # outbound.py (excerpted on the page) documents an unconditional send_to_ceo path, so the
+    # prose must claim the third-party gate, not a universal "nothing sends without approval".
+    html = (ROOT / "index.html").read_text()
+    assert "nada sai sem aprovação humana" not in html
+    assert "O único envio" not in html
+    assert "sem a minha aprovação" in html
+
+
+def test_crm_lead_promise_has_a_deliverable():
+    # Lead promises "compradas e postas a trabalhar: … um CRM"; a card must deliver it.
+    html = (ROOT / "index.html").read_text()
+    assert "CRM escolhido" in html
 
 
 def test_no_engineering_card_grid_corpus_stays_as_the_one_system():
